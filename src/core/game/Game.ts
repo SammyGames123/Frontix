@@ -912,6 +912,14 @@ export interface Game extends GameMap {
    */
   nationTerritoryMap(): import("./NationTerritoryMap").NationTerritoryMap | null;
 
+  // Resource nodes
+  /** Every strategic resource node on the map. */
+  resourceNodes(): readonly import("./ResourceNodes").ResourceNode[];
+  /** The resource node at the given tile, if any. */
+  resourceNodeAt(
+    tile: TileRef,
+  ): import("./ResourceNodes").ResourceNode | undefined;
+
   numTilesWithFallout(): number;
   stats(): Stats;
 

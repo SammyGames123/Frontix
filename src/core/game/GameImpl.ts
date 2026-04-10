@@ -42,6 +42,7 @@ import { GameUpdate, GameUpdateType } from "./GameUpdates";
 import { MotionPlanRecord, packMotionPlans } from "./MotionPlans";
 import { NationTerritoryMap } from "./NationTerritoryMap";
 import { PlayerImpl } from "./PlayerImpl";
+import { ResourceNode, ResourceNodeMap } from "./ResourceNodes";
 import { RailNetwork } from "./RailNetwork";
 import { createRailNetwork } from "./RailNetworkImpl";
 import { Stats } from "./Stats";
@@ -110,6 +111,7 @@ export class GameImpl implements Game {
   private _waterManager: WaterManager;
   private _teamGameSpawnAreas: TeamGameSpawnAreas | undefined;
   private _nationTerritoryMap: NationTerritoryMap | null = null;
+  private _resourceNodeMap: ResourceNodeMap;
 
   constructor(
     private _humans: PlayerInfo[],
@@ -148,6 +150,14 @@ export class GameImpl implements Game {
       );
     }
 
+    // Scatter strategic resource nodes across the map. Controlling these
+    // grants per-tick gold/troop bonuses, so small nations can stay
+    // competitive with large ones by contesting nodes.
+    this._resourceNodeMap = new ResourceNodeMap(this._map);
+    console.log(
+      `[GameImpl] Placed ${this._resourceNodeMap.count()} resource nodes`,
+    );
+
     console.log(
       `[GameImpl] Constructor total: ${(performance.now() - constructorStart).toFixed(0)}ms`,
     );
@@ -155,6 +165,14 @@ export class GameImpl implements Game {
 
   nationTerritoryMap(): NationTerritoryMap | null {
     return this._nationTerritoryMap;
+  }
+
+  resourceNodes(): readonly ResourceNode[] {
+    return this._resourceNodeMap.all();
+  }
+
+  resourceNodeAt(tile: TileRef): ResourceNode | undefined {
+    return this._resourceNodeMap.at(tile);
   }
 
   private populateTeams() {

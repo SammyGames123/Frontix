@@ -8,6 +8,7 @@ import {
   UnitType,
 } from "../game/Game";
 import { TileRef } from "../game/GameMap";
+import { playerResourceBonus } from "../game/ResourceNodes";
 import { calculateBoundingBox, getMode, inscribed, simpleHash } from "../Util";
 
 interface ClusterTraversalState {
@@ -73,9 +74,16 @@ export class PlayerExecution implements Execution {
       return;
     }
 
-    const troopInc = this.config.troopIncreaseRate(this.player);
+    // Bonuses from owned strategic resource nodes. Nodes contribute a flat
+    // amount on top of base gold/troop generation, making them high-value
+    // contested objectives regardless of how much territory a player holds.
+    const resourceIncome = playerResourceBonus(this.mg, this.player);
+
+    const troopInc =
+      this.config.troopIncreaseRate(this.player) + resourceIncome.troops;
     this.player.addTroops(troopInc);
-    const goldFromWorkers = this.config.goldAdditionRate(this.player);
+    const goldFromWorkers =
+      this.config.goldAdditionRate(this.player) + resourceIncome.gold;
     this.player.addGold(goldFromWorkers);
 
     // Record stats
