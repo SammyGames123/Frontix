@@ -40,6 +40,7 @@ import {
 import { GameMap, TileRef } from "./GameMap";
 import { GameUpdate, GameUpdateType } from "./GameUpdates";
 import { MotionPlanRecord, packMotionPlans } from "./MotionPlans";
+import { NationTerritoryMap } from "./NationTerritoryMap";
 import { PlayerImpl } from "./PlayerImpl";
 import { RailNetwork } from "./RailNetwork";
 import { createRailNetwork } from "./RailNetworkImpl";
@@ -108,6 +109,7 @@ export class GameImpl implements Game {
   private _winner: Player | Team | null = null;
   private _waterManager: WaterManager;
   private _teamGameSpawnAreas: TeamGameSpawnAreas | undefined;
+  private _nationTerritoryMap: NationTerritoryMap | null = null;
 
   constructor(
     private _humans: PlayerInfo[],
@@ -136,9 +138,23 @@ export class GameImpl implements Game {
     }
     this.addPlayers();
 
+    // Precompute which nation owns every land tile so players can start
+    // already controlling the full territory of a real-world country.
+    if (this._nations.length > 0) {
+      const territoryStart = performance.now();
+      this._nationTerritoryMap = new NationTerritoryMap(this._map, this._nations);
+      console.log(
+        `[GameImpl] Nation territory allocation: ${(performance.now() - territoryStart).toFixed(0)}ms`,
+      );
+    }
+
     console.log(
       `[GameImpl] Constructor total: ${(performance.now() - constructorStart).toFixed(0)}ms`,
     );
+  }
+
+  nationTerritoryMap(): NationTerritoryMap | null {
+    return this._nationTerritoryMap;
   }
 
   private populateTeams() {

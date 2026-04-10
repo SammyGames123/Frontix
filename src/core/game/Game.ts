@@ -905,6 +905,12 @@ export interface Game extends GameMap {
 
   // Nations
   nations(): Nation[];
+  /**
+   * Returns the precomputed map of nation → territory tiles if one exists
+   * for this game (i.e. the map manifest defines nations). Used to spawn
+   * players already owning the full territory of a real-world country.
+   */
+  nationTerritoryMap(): import("./NationTerritoryMap").NationTerritoryMap | null;
 
   numTilesWithFallout(): number;
   stats(): Stats;
