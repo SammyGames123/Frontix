@@ -27,10 +27,10 @@ export class GameStartingModal extends LitElement {
         <div
           class="text-base font-medium tracking-wider uppercase text-white/40 mb-3"
         >
-          © OpenFront and Contributors
+          © Frontix and Contributors
         </div>
         <a
-          href="https://github.com/openfrontio/OpenFrontIO/blob/main/CREDITS.md"
+          href="https://github.com/SammyGames123/Frontix/blob/main/CREDITS.md"
           target="_blank"
           rel="noopener noreferrer"
           class="block mb-4 text-lg font-medium tracking-wider uppercase text-sky-400 no-underline transition-colors duration-200 hover:text-sky-300"

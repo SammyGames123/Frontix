@@ -14,12 +14,12 @@ export function normalizeNewsMarkdown(markdown: string): string {
       .replace(
         GITHUB_PR_URL_REGEX,
         (_match, prNumber) =>
-          `[#${prNumber}](https://github.com/openfrontio/OpenFrontIO/pull/${prNumber})`,
+          `[#${prNumber}](https://github.com/YOURNAME/Frontix/pull/${prNumber})`,
       )
       .replace(
         GITHUB_COMPARE_URL_REGEX,
         (_match, comparison) =>
-          `[${comparison}](https://github.com/openfrontio/OpenFrontIO/compare/${comparison})`,
+          `[${comparison}](https://github.com/YOURNAME/Frontix/compare/${comparison})`,
       )
       .replace(
         GITHUB_MENTION_REGEX,

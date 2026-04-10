@@ -61,7 +61,7 @@ const logger = winston.createLogger({
     winston.format.json(),
   ),
   defaultMeta: {
-    service: "openfront",
+    service: "frontix",
     environment: process.env.GAME_ENV ?? "prod",
   },
   transports: [
