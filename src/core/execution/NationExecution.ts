@@ -99,6 +99,36 @@ export class NationExecution implements Execution {
     }
 
     if (this.mg.inSpawnPhase()) {
+      // If this map has nation territories, each AI nation claims its full
+      // country immediately on the very first spawn-phase tick. No need to
+      // wait for attackRate cycles or fiddle with team spawn areas — the
+      // nation's territory is already deterministic.
+      if (
+        !this.player.hasSpawned() &&
+        this.mg.nationTerritoryMap() !== null &&
+        this.nation.spawnCell !== undefined
+      ) {
+        const territoryMap = this.mg.nationTerritoryMap();
+        if (territoryMap !== null) {
+          const tiles = territoryMap.tilesForNation(this.nation);
+          if (tiles.length > 0) {
+            // Use the tile closest to the manifest spawn cell as the center.
+            const cell = this.nation.spawnCell;
+            const centerTile = this.mg.isValidCoord(cell.x, cell.y)
+              ? this.mg.ref(cell.x, cell.y)
+              : tiles[0];
+            this.mg.addExecution(
+              new SpawnExecution(
+                this.gameID,
+                this.nation.playerInfo,
+                centerTile,
+              ),
+            );
+            return;
+          }
+        }
+      }
+
       if (ticks % this.attackRate !== this.attackTick) {
         return;
       }

@@ -64,8 +64,24 @@ export class SpawnExecution implements Execution {
       return;
     }
 
+    // If the spawn territory is already (partially) owned by other players —
+    // e.g. a human clicked on an AI nation's country to steal it — force the
+    // previous owners to relinquish those tiles before the new player
+    // conquers them. Players reduced to zero tiles this way will be cleaned
+    // up by PlayerExecution once the spawn phase ends.
     spawn.tiles.forEach((t) => {
-      player.conquer(t);
+      if (!this.mg.hasOwner(t)) return;
+      const currentOwner = this.mg.owner(t);
+      if (!currentOwner.isPlayer()) return;
+      const ownerPlayer = currentOwner as Player;
+      if (ownerPlayer.id() === player.id()) return;
+      ownerPlayer.relinquish(t);
+    });
+
+    spawn.tiles.forEach((t) => {
+      if (!this.mg.hasOwner(t) || this.mg.ownerID(t) !== player.smallID()) {
+        player.conquer(t);
+      }
     });
 
     if (!player.hasSpawned()) {
@@ -88,6 +104,13 @@ export class SpawnExecution implements Execution {
 
   private getSpawn(center?: TileRef): Spawn | undefined {
     if (center !== undefined) {
+      // If this map has nation territories, spawning on any tile claims the
+      // entire country that tile belongs to rather than a small cluster.
+      const nationSpawn = this.getNationSpawn(center);
+      if (nationSpawn !== undefined) {
+        return nationSpawn;
+      }
+
       const tiles = getSpawnTiles(this.mg, center, false);
 
       if (!tiles.length) {
@@ -143,6 +166,16 @@ export class SpawnExecution implements Execution {
     }
 
     return;
+  }
+
+  private getNationSpawn(center: TileRef): Spawn | undefined {
+    const territoryMap = this.mg.nationTerritoryMap();
+    if (territoryMap === null) return undefined;
+    const nationIndex = territoryMap.nationIndexAt(center);
+    if (nationIndex < 0) return undefined;
+    const tiles = territoryMap.tilesForNationIndex(nationIndex);
+    if (tiles.length === 0) return undefined;
+    return { center, tiles };
   }
 
   private randTile(area?: SpawnArea): TileRef {
