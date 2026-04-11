@@ -765,10 +765,17 @@ export class DefaultConfig implements Config {
   }
 
   maxTroops(player: Player | PlayerView): number {
+    // Territory contributes to the troop cap, but with a heavily compressed
+    // exponent (0.4 instead of the older 0.6). Because players now begin
+    // already controlling the full territory of a real nation, large
+    // countries like Russia or the US would otherwise start with a
+    // crushingly higher cap than small ones like Belgium. Flattening the
+    // curve keeps small nations viable as long as they secure strategic
+    // resource nodes for their bonus income.
     const maxTroops =
       player.type() === PlayerType.Human && this.infiniteTroops()
         ? 1_000_000_000
-        : 2 * (Math.pow(player.numTilesOwned(), 0.6) * 1000 + 50000) +
+        : 2 * (Math.pow(player.numTilesOwned(), 0.4) * 1000 + 50000) +
           player
             .units(UnitType.City)
             .map((city) => city.level())
@@ -832,12 +839,16 @@ export class DefaultConfig implements Config {
   }
 
   goldAdditionRate(player: Player): Gold {
+    // Base gold generation is intentionally low: most of a player's income
+    // should come from controlling strategic resource nodes rather than
+    // from raw territory ownership. This makes contesting nodes the
+    // dominant mid-game objective for every nation, big or small.
     const multiplier = this.goldMultiplier();
     let baseRate: bigint;
     if (player.type() === PlayerType.Bot) {
-      baseRate = 50n;
+      baseRate = 20n;
     } else {
-      baseRate = 100n;
+      baseRate = 40n;
     }
     return BigInt(Math.floor(Number(baseRate) * multiplier));
   }

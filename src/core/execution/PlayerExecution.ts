@@ -79,8 +79,13 @@ export class PlayerExecution implements Execution {
     // contested objectives regardless of how much territory a player holds.
     const resourceIncome = playerResourceBonus(this.mg, this.player);
 
-    const troopInc =
-      this.config.troopIncreaseRate(this.player) + resourceIncome.troops;
+    // Clamp total troop gain so resource node troop bonuses can't push the
+    // player above maxTroops. troopIncreaseRate() already caps its own
+    // output; we re-cap against the same limit after adding the bonus.
+    const baseTroopInc = this.config.troopIncreaseRate(this.player);
+    const maxTroops = this.config.maxTroops(this.player);
+    const headroom = Math.max(0, maxTroops - this.player.troops());
+    const troopInc = Math.min(baseTroopInc + resourceIncome.troops, headroom);
     this.player.addTroops(troopInc);
     const goldFromWorkers =
       this.config.goldAdditionRate(this.player) + resourceIncome.gold;
