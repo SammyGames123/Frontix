@@ -14,6 +14,7 @@ import { ChatDisplay } from "./layers/ChatDisplay";
 import { ChatModal } from "./layers/ChatModal";
 import { ControlPanel } from "./layers/ControlPanel";
 import { CoordinateGridLayer } from "./layers/CoordinateGridLayer";
+import { ResourceNodesLayer } from "./layers/ResourceNodesLayer";
 import { DynamicUILayer } from "./layers/DynamicUILayer";
 import { EmojiTable } from "./layers/EmojiTable";
 import { EventsDisplay } from "./layers/EventsDisplay";
@@ -283,6 +284,7 @@ export function createRenderer(
     new UILayer(game, eventBus, transformHandler),
     new NukeTrajectoryPreviewLayer(game, eventBus, transformHandler, uiState),
     new StructureIconsLayer(game, eventBus, uiState, transformHandler),
+    new ResourceNodesLayer(game, transformHandler),
     new DynamicUILayer(game, transformHandler, eventBus),
     new NameLayer(game, transformHandler, eventBus),
     new AttackingTroopsOverlay(game, transformHandler, eventBus, userSettings),
