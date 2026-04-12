@@ -94,10 +94,26 @@ export async function genTerrainFromBin(
   mapData: MapMetadata,
   data: Uint8Array,
 ): Promise<GameMap> {
-  if (data.length !== mapData.width * mapData.height) {
-    throw new Error(
-      `Invalid data: buffer size ${data.length} incorrect for ${mapData.width}x${mapData.height} terrain plus 4 bytes for dimensions.`,
-    );
+  const expected = mapData.width * mapData.height;
+  if (data.length !== expected) {
+    // Git on Windows with core.autocrlf may expand 0x0A bytes to 0x0D 0x0A,
+    // inflating binary map files. Strip only the 0x0D that precedes 0x0A
+    // (the CRLF pair git inserts) so the map loads from a corrupted checkout.
+    const clean = new Uint8Array(data.length);
+    let j = 0;
+    for (let i = 0; i < data.length; i++) {
+      if (data[i] === 0x0d && i + 1 < data.length && data[i + 1] === 0x0a) {
+        continue; // skip \r that's part of \r\n
+      }
+      clean[j++] = data[i];
+    }
+    if (j === expected) {
+      data = clean.subarray(0, j);
+    } else {
+      throw new Error(
+        `Invalid data: buffer size ${data.length} incorrect for ${mapData.width}x${mapData.height} terrain (expected ${expected} bytes).`,
+      );
+    }
   }
 
   return new GameMapImpl(
